@@ -4,9 +4,11 @@
 package FolhaPagamento;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 import FolhaPagamento.models.Calculadora;
 import FolhaPagamento.models.Funcionario;
@@ -15,6 +17,7 @@ import FolhaPagamento.models.Funcionario.Insalubridade;
 public class App {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        Logger log = Logger.getLogger(App.class.getName());
 
         Funcionario func = new Funcionario();
         Calculadora calc = new Calculadora();
@@ -27,17 +30,26 @@ public class App {
         System.out.print("Digite seu CPF: ");
         func.setCPF(scanner.nextLine());
 
-        System.out.print("Digite seu salário: ");
+        System.out.print("Cargo: ");
+        func.setCargo(scanner.nextLine());
+
+        System.out.print("Digite seu salário: R$");
         func.setSalario(new BigDecimal(scanner.nextLine()));
 
-        System.out.println("Data de admissão: ");
-        func.setDataAdmissao(LocalDate.parse(scanner.nextLine()));
+        System.out.print("Data de admissão: ");
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            func.setDataAdmissao(formatter.parse(scanner.nextLine()));
+        } catch (Exception e) {
+            log.log(log.getLevel(),"Erro: " + e.getMessage());
+        }
 
         System.out.print("Digite sua carga horária: ");
         func.setCargaHoraria(scanner.nextInt());
 
         System.out.print("Possui periculosidade? [S/N] ");
         char escolha = scanner.next().charAt(0);
+        scanner.nextLine();
 
         if (escolha == 'S') {
             func.setPericulosidade(true);
@@ -45,18 +57,20 @@ public class App {
 
         System.out.print("Trabalha em condições insalubres? [S/N] ");
         escolha = scanner.next().charAt(0);
+        scanner.nextLine();
 
         if (escolha == 'S') {
             System.out.println("Qual o nível de insalubridade?\n1: BAIXO\n2: MÉDIO\n3: ALTO");
-            byte nivelInsalubridade = scanner.nextByte();
+            int nivelInsalubridade = scanner.nextInt();
+            scanner.nextLine();
 
-            func.setInsalubridade(Insalubridade.values()[nivelInsalubridade]);
+            func.setInsalubridade(Insalubridade.values()[nivelInsalubridade - 1]);
         }
 
-        System.out.println("Valor vale transporte: R$");
+        System.out.print("Valor vale transporte: R$");
         BigDecimal valorValeTransporte = new BigDecimal(scanner.nextLine());
 
-        System.out.println("Valor diário do vale alimentação: R$");
+        System.out.print("Valor diário do vale alimentação: R$");
         BigDecimal valorValeAlimentacao = new BigDecimal(scanner.nextLine());
 
 
@@ -91,6 +105,8 @@ public class App {
         // descontos
         System.out.println();
 
+        System.out.println("DESCONTOS");
+
         BigDecimal descontoValeTransporte = calc.valeTransporte(func.getSalario(), valorValeTransporte);
         System.out.println("Vale transporte: R$" + descontoValeTransporte);
 
@@ -105,6 +121,8 @@ public class App {
 
         BigDecimal descontoIRRF = calc.irrf(func.getSalario());
         System.out.println("Imposto de Renda: R$" + descontoIRRF);
+
+        System.out.println();
 
 
         BigDecimal salarioLiquido = func.getSalario()

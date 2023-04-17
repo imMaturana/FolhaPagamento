@@ -1,6 +1,7 @@
 package FolhaPagamento.models;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Year;
@@ -13,7 +14,7 @@ public class Calculadora {
         int jornadaSemanal = cargaHoraria * 5;
         int jornadaMensal = jornadaSemanal * 5;
 
-        return salario.divide(new BigDecimal(Integer.toString(jornadaMensal)));
+        return salario.divide(new BigDecimal(Integer.toString(jornadaMensal)), 2, RoundingMode.HALF_UP);
     }
 
     public BigDecimal periculosidade(BigDecimal salario) {
@@ -36,14 +37,14 @@ public class Calculadora {
                 break;
         }
 
-        return adicional;
+        return salario.multiply(adicional);
     }
 
     public BigDecimal valeTransporte(BigDecimal salario, BigDecimal valor) {
         final BigDecimal DESCONTO_MAXIMO = new BigDecimal("0.6");
 
-        if (salario.divide(DESCONTO_MAXIMO).compareTo(valor) == 1) {
-            return salario.subtract(salario.divide(DESCONTO_MAXIMO));
+        if (salario.multiply(DESCONTO_MAXIMO).compareTo(valor) == 1) {
+            return salario.subtract(salario.multiply(DESCONTO_MAXIMO));
         }
 
         return salario.subtract(valor);
@@ -64,16 +65,16 @@ public class Calculadora {
         BigDecimal desconto;
 
         if (salario.compareTo(new BigDecimal("1302.00")) <= 0) {
-            desconto = salario.multiply(new BigDecimal("0.075"));
+            desconto = new BigDecimal("0.075");
         } else if (salario.compareTo(new BigDecimal("2571.29")) <= 0) {
-            desconto = salario.multiply(new BigDecimal("0.09"));
+            desconto = new BigDecimal("0.09");
         } else if (salario.compareTo(new BigDecimal("3856.94")) <= 0) {
-            desconto = salario.multiply(new BigDecimal("0.12"));
+            desconto = new BigDecimal("0.12");
         } else {
-            desconto = salario.multiply(new BigDecimal("0.14"));
+            desconto = new BigDecimal("0.14");
         }
 
-        return desconto;
+        return salario.multiply(desconto);
     }
 
     public BigDecimal fgts(BigDecimal salario) {
@@ -83,7 +84,7 @@ public class Calculadora {
     }
 
     public BigDecimal irrf(BigDecimal salario) {
-        BigDecimal salarioBase = new BigDecimal(salario.subtract(inss(salario)).toString());
+        BigDecimal salarioBase = salario.subtract(inss(salario));
         BigDecimal valorIRRF;
 
         if (salarioBase.compareTo(new BigDecimal("1903.98")) <= 0) {

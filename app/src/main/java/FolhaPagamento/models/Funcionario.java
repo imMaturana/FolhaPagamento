@@ -2,7 +2,7 @@ package FolhaPagamento.models;
 
 import java.math.BigDecimal;
 import java.util.regex.Pattern;
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.regex.Matcher;
 
 public class Funcionario {
@@ -10,7 +10,7 @@ public class Funcionario {
     private String cpf;
     private String cargo;
     private BigDecimal salario;
-    private LocalDate dataAdmissao;
+    private Date dataAdmissao;
     private int cargaHoraria;
     private boolean periculosidade;
     private Insalubridade insalubridade;
@@ -63,11 +63,11 @@ public class Funcionario {
         this.salario = salario;
     }
 
-    public LocalDate getDataAdmissao() {
+    public Date getDataAdmissao() {
         return dataAdmissao;
     }
 
-    public void setDataAdmissao(LocalDate dataAdmissao) {
+    public void setDataAdmissao(Date dataAdmissao) {
         this.dataAdmissao = dataAdmissao;
     }
 
