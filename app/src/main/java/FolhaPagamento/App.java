@@ -3,12 +3,122 @@
  */
 package FolhaPagamento;
 
-public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.Scanner;
 
+import FolhaPagamento.models.Calculadora;
+import FolhaPagamento.models.Funcionario;
+import FolhaPagamento.models.Funcionario.Insalubridade;
+
+public class App {
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        Scanner scanner = new Scanner(System.in);
+
+        Funcionario func = new Funcionario();
+        Calculadora calc = new Calculadora();
+
+        Month mes = LocalDate.now().getMonth();
+
+        System.out.print("Digite o nome do funcionário: ");
+        func.setNome(scanner.nextLine());
+
+        System.out.print("Digite seu CPF: ");
+        func.setCPF(scanner.nextLine());
+
+        System.out.print("Digite seu salário: ");
+        func.setSalario(new BigDecimal(scanner.nextLine()));
+
+        System.out.println("Data de admissão: ");
+        func.setDataAdmissao(LocalDate.parse(scanner.nextLine()));
+
+        System.out.print("Digite sua carga horária: ");
+        func.setCargaHoraria(scanner.nextInt());
+
+        System.out.print("Possui periculosidade? [S/N] ");
+        char escolha = scanner.next().charAt(0);
+
+        if (escolha == 'S') {
+            func.setPericulosidade(true);
+        }
+
+        System.out.print("Trabalha em condições insalubres? [S/N] ");
+        escolha = scanner.next().charAt(0);
+
+        if (escolha == 'S') {
+            System.out.println("Qual o nível de insalubridade?\n1: BAIXO\n2: MÉDIO\n3: ALTO");
+            byte nivelInsalubridade = scanner.nextByte();
+
+            func.setInsalubridade(Insalubridade.values()[nivelInsalubridade]);
+        }
+
+        System.out.println("Valor vale transporte: R$");
+        BigDecimal valorValeTransporte = new BigDecimal(scanner.nextLine());
+
+        System.out.println("Valor diário do vale alimentação: R$");
+        BigDecimal valorValeAlimentacao = new BigDecimal(scanner.nextLine());
+
+
+        System.out.println("Nome do funcinário: " + func.getNome());
+        System.out.println("Data de admissão: " + func.getDataAdmissao());
+        System.out.println("Mês de referência: " + mes);
+        System.out.println("Cargo: " + func.getCargo());
+        System.out.println("Salário bruto: " + func.getSalario());
+
+        // adicionais
+        System.out.println();
+
+        System.out.println("PROVENTOS E ADICIONAIS");
+        System.out.println("Salário: R$" + func.getSalario());
+
+        BigDecimal adicionalPericulosidade = new BigDecimal("0");
+        if (func.getPericulosidade()) {
+            adicionalPericulosidade = calc.periculosidade(func.getSalario());
+            System.out.println("Periculosidade: R$" + adicionalPericulosidade);
+        }
+
+        BigDecimal adicionalInsalubridade = new BigDecimal("0");
+        if (func.getInsalubridade() != null) {
+            adicionalInsalubridade = calc.insalubridade(
+                func.getSalario(),
+                func.getInsalubridade()
+            );
+
+            System.out.println("Insalubridade: R$" + adicionalInsalubridade);
+        }
+
+        // descontos
+        System.out.println();
+
+        BigDecimal descontoValeTransporte = calc.valeTransporte(func.getSalario(), valorValeTransporte);
+        System.out.println("Vale transporte: R$" + descontoValeTransporte);
+
+        BigDecimal descontoValeAlimentacao = calc.valeAlimentacao(valorValeAlimentacao, mes);
+        System.out.println("Valor vale alimentação: R$" + descontoValeAlimentacao);
+
+        BigDecimal descontoINSS = calc.inss(func.getSalario());
+        System.out.println("INSS: R$" + descontoINSS);
+
+        BigDecimal descontoFGTS = calc.fgts(func.getSalario());
+        System.out.println("FGTS: R$" + descontoFGTS);
+
+        BigDecimal descontoIRRF = calc.irrf(func.getSalario());
+        System.out.println("Imposto de Renda: R$" + descontoIRRF);
+
+
+        BigDecimal salarioLiquido = func.getSalario()
+            .add(adicionalPericulosidade)
+            .add(adicionalInsalubridade)
+            .subtract(descontoValeTransporte)
+            .subtract(descontoValeAlimentacao)
+            .subtract(descontoINSS)
+            .subtract(descontoFGTS)
+            .subtract(descontoIRRF);
+
+        
+        System.out.println("Salário bruto: R$" + func.getSalario());
+        System.out.println("Salário por hora: R$" + calc.salarioHora(func.getSalario(), func.getCargaHoraria()));
+        System.out.println("Salário líquido: R$" + salarioLiquido);
     }
 }
